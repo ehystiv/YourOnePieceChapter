@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { parseISO, prepare, lookup } from '../public/lookup.js';
+import { cleanTitle, hasMarkup } from '../scripts/clean-title.mjs';
 
 const data = JSON.parse(await readFile(new URL('../public/chapters.json', import.meta.url), 'utf8'));
 const list = prepare(data.chapters);
@@ -72,6 +73,24 @@ test('parseISO rifiuta date inesistenti', () => {
   assert.equal(parseISO('2023-02-29'), null);
   assert.equal(parseISO('ciao'), null);
   assert.notEqual(parseISO('2024-02-29'), null);
+});
+
+test('nessun titolo contiene markup wiki o HTML', () => {
+  const bad = list.filter(c => hasMarkup(c.titleEn) || hasMarkup(c.titleJa)).map(c => c.chapter);
+  assert.deepEqual(bad, []);
+});
+
+test('cleanTitle ripulisce i casi visti sulla wiki', () => {
+  assert.equal(cleanTitle('{{ruby|仕事|ビジネス}}'), '仕事');
+  assert.equal(cleanTitle('{{Ruby|行進曲|マーチ}}'), '行進曲');
+  assert.equal(cleanTitle("'''0'''"), '0');
+  assert.equal(cleanTitle('Donut Race<nowiki>!!</nowiki>'), 'Donut Race!!');
+  assert.equal(cleanTitle('<s>3D</s>2Y'), '3D2Y');
+  assert.equal(cleanTitle('The Mermaid Princess<br/>in Hard-Shell Tower'), 'The Mermaid Princess in Hard-Shell Tower');
+  assert.equal(cleanTitle('兄弟盃 (volume)<br/>兄弟杯 (magazine)'), '兄弟盃');
+  assert.equal(cleanTitle('怒り|'), '怒り');
+  assert.equal(cleanTitle('TBA'), null);
+  assert.equal(cleanTitle(''), null);
 });
 
 test('il dataset è ordinato, senza buchi e con numeri crescenti', () => {

@@ -23,6 +23,12 @@ npm test             # test con i casi dell'HANDOFF
 npm run update-data  # aggiorna public/chapters.json dalla wiki
 ```
 
+`update-data` riprende sempre tutte le date, ma dalla wiki scarica solo i titoli mancanti (capitoli nuovi o ancora senza titolo). I titoli di 1–1145 vengono da una traduzione curata e la wiki ne ha di diversi. Per riscaricarli comunque tutti:
+
+```bash
+node scripts/update-chapters.mjs --all-titles
+```
+
 ## Link condivisibili
 
 La data scelta finisce nell'hash dell'URL, per esempio `/#1997-07-25`. Funziona su qualunque hosting statico senza regole di rewrite.
