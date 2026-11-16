@@ -39,7 +39,7 @@ La data scelta finisce nell'hash dell'URL, per esempio `/#1997-07-25`. Funziona 
 
 ## Pubblicazione
 
-Il sito è online su **https://ehystiv.github.io/YourOnePieceChapter/**, pubblicato con GitHub Pages tramite GitHub Actions:
+Il sito è online su **https://your-one-piece-chapter.ehystiv.dev/**, pubblicato con GitHub Pages tramite GitHub Actions. Il dominio personalizzato e l'HTTPS obbligatorio sono impostati in *Settings → Pages*, e `ehystiv.github.io/YourOnePieceChapter/` reindirizza lì.
 
 - [`.github/workflows/pages.yml`](.github/workflows/pages.yml) esegue i test e pubblica `public/` a ogni push su `main` che tocca il sito (si può anche avviare a mano da *Actions*).
 - [`.github/workflows/update-data.yml`](.github/workflows/update-data.yml) ogni lunedì alle 06:00 UTC rigenera `chapters.json` dalla wiki. Se i capitoli sono cambiati fa il commit e ripubblica il sito. Si può avviare a mano da *Actions → Update chapter data → Run workflow*.
