@@ -5,7 +5,6 @@ const $ = id => document.getElementById(id);
 const form = $('f'), input = $('d'), card = $('card'), err = $('err'), stats = $('stats');
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const wiki = n => 'https://onepiece.fandom.com/wiki/Chapter_' + n;
 
 let lang = loadLang();
 let T = STRINGS[lang];
@@ -25,12 +24,25 @@ function showError(key) {
   err.textContent = key ? T[key] : '';
 }
 
+// Titolo nella lingua scelta; se manca, quello inglese (con il suo attributo lang).
+function localTitle(c) {
+  if (c[T.titleField]) return { text: c[T.titleField], lang };
+  if (c.titleEn) return { text: c.titleEn, lang: 'en' };
+  return null;
+}
+
+// Scheda sulla wiki della lingua scelta; se lì il capitolo non c'è ancora (nessun titolo), quella inglese.
+const wikiHref = c => (c[T.titleField] ? T : STRINGS.en).wikiUrl(c.chapter);
+
 function chapterBlock(c, label, future) {
-  const en = c.titleEn ? esc(c.titleEn) : (future ? T.titleTba : '—');
+  const t = localTitle(c);
+  const title = t
+    ? `<div class="en"${t.lang !== lang ? ` lang="${t.lang}"` : ''}>${esc(t.text)}</div>`
+    : `<div class="en">${future ? T.titleTba : '—'}</div>`;
   return `
     <div class="label">${label}</div>
     <div class="num"><small>${T.chapterShort}</small>${c.chapter}</div>
-    <div class="en">${en}</div>
+    ${title}
     <p class="ja" lang="ja">${c.titleJa ? esc(c.titleJa) : ''}</p>`;
 }
 
@@ -39,11 +51,11 @@ function renderBefore(r) {
     <div class="label">${esc(fmt(r.date))}</div>
     <div class="num num--text">${T.notYet}</div>
     <p class="en">${T.notStarted}</p>
-    <div class="meta">${T.beforeMeta(days(r.daysToFirst), r.first.chapter, r.first.titleEn ? esc(r.first.titleEn) : '', esc(fmtShort(r.first.ms)))}</div>
+    <div class="meta">${T.beforeMeta(days(r.daysToFirst), r.first.chapter, esc(localTitle(r.first)?.text ?? ''), esc(fmtShort(r.first.ms)))}</div>
     ${r.romanceDawn ? `<div class="note">${T.romanceDawn(esc(fmtShort(ROMANCE_DAWN)))}</div>` : ''}
     <div class="nav">
       <span></span>
-      <a class="wiki" href="${wiki(r.first.chapter)}" target="_blank" rel="noopener">${T.wikiChapter(r.first.chapter)}</a>
+      <a class="wiki" href="${wikiHref(r.first)}" target="_blank" rel="noopener">${T.wikiChapter(r.first.chapter)}</a>
       <a href="#${toISO(r.first.ms)}">${T.chapterShort} ${r.first.chapter} →</a>
     </div>`;
 }
@@ -65,7 +77,7 @@ function renderChapter(r) {
     ${note ? `<div class="note">${note}</div>` : ''}
     <div class="nav">
       ${r.prev ? `<a href="#${toISO(r.prev.ms)}">← ${T.chapterShort} ${r.prev.chapter}</a>` : '<span></span>'}
-      <a class="wiki" href="${wiki(c.chapter)}" target="_blank" rel="noopener">${T.wikiRead}</a>
+      <a class="wiki" href="${wikiHref(c)}" target="_blank" rel="noopener">${T.wikiRead}</a>
       ${r.next ? `<a href="#${toISO(r.next.ms)}">${T.chapterShort} ${r.next.chapter} →</a>` : '<span></span>'}
     </div>`;
 }

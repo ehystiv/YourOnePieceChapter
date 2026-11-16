@@ -7,6 +7,8 @@ export const DEFAULT_LANG = 'en';
 export const STRINGS = {
   en: {
     locale: 'en-US',
+    titleField: 'titleEn',
+    wikiUrl: n => `https://onepiece.fandom.com/wiki/Chapter_${n}`,
     pageTitle: 'Your One Piece Chapter',
     chapterTitle: n => `Chapter ${n} · Your One Piece Chapter`,
     description: 'Enter a date and find out which One Piece chapter was on newsstands in Japan that week.',
@@ -49,6 +51,8 @@ export const STRINGS = {
   },
   it: {
     locale: 'it-IT',
+    titleField: 'titleIt',
+    wikiUrl: n => `https://onepiece.fandom.com/it/wiki/Capitolo_${n}`,
     pageTitle: 'Il tuo capitolo di One Piece',
     chapterTitle: n => `Capitolo ${n} · Il tuo capitolo di One Piece`,
     description: 'Inserisci una data e scopri quale capitolo di One Piece era in edicola in Giappone quella settimana.',
@@ -83,7 +87,7 @@ export const STRINGS = {
     stats: (count, first, firstDate, last, lastFuture, lastDate) =>
       `${count} capitoli, dal n. ${first} (${firstDate}) al n. ${last} (${lastFuture ? 'previsto il ' : ''}${lastDate}).`,
     updated: date => `Dati aggiornati al ${date}.`,
-    source: 'Date di uscita giapponesi e titoli tratti dalla <a href="https://onepiece.fandom.com/wiki/Chapters_and_Volumes" target="_blank" rel="noopener">One Piece Wiki</a> (licenza <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA</a>).',
+    source: 'Date di uscita giapponesi tratte dalla <a href="https://onepiece.fandom.com/wiki/Chapters_and_Volumes" target="_blank" rel="noopener">One Piece Wiki</a>, titoli italiani dalla <a href="https://onepiece.fandom.com/it/wiki/One_Piece_Wiki_Italia" target="_blank" rel="noopener">One Piece Wiki Italia</a> (licenza <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA</a>).',
     fanMade: 'Pagina non ufficiale, realizzata da un fan.',
   },
 };
