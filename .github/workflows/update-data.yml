@@ -1,0 +1,57 @@
+name: Update chapter data
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # ogni lunedì alle 06:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Regenerate public/chapters.json
+        run: npm run update-data
+
+      - name: Test
+        run: npm test
+
+      - name: Commit if changed
+        id: commit
+        run: |
+          # generatedAt cambia a ogni esecuzione: si committa solo se cambiano i capitoli.
+          if git diff --quiet -I '"generatedAt"' -- public/chapters.json; then
+            echo "Nessun capitolo nuovo o modificato."
+            git checkout -- public/chapters.json
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/chapters.json
+          git commit -m "chore(data): 🔧 update chapters from One Piece Wiki"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # Un push fatto con GITHUB_TOKEN non avvia altri workflow: la pubblicazione va richiamata qui.
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
