@@ -54,6 +54,7 @@ export const STRINGS = {
     updated: date => `Data updated on ${date}.`,
     source: 'Japanese release dates and titles from the <a href="https://onepiece.fandom.com/wiki/Chapters_and_Volumes" target="_blank" rel="noopener">One Piece Wiki</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA</a> license).',
     fanMade: 'Unofficial fan-made page.',
+    code: 'Source code on <a href="https://github.com/ehystiv/YourOnePieceChapter" target="_blank" rel="noopener">GitHub</a>.',
   },
   it: {
     locale: 'it-IT',
@@ -101,6 +102,7 @@ export const STRINGS = {
     updated: date => `Dati aggiornati al ${date}.`,
     source: 'Date di uscita giapponesi tratte dalla <a href="https://onepiece.fandom.com/wiki/Chapters_and_Volumes" target="_blank" rel="noopener">One Piece Wiki</a>, titoli italiani dalla <a href="https://onepiece.fandom.com/it/wiki/One_Piece_Wiki_Italia" target="_blank" rel="noopener">One Piece Wiki Italia</a> (licenza <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA</a>).',
     fanMade: 'Pagina non ufficiale, realizzata da un fan.',
+    code: 'Codice sorgente su <a href="https://github.com/ehystiv/YourOnePieceChapter" target="_blank" rel="noopener">GitHub</a>.',
   },
 };
 
