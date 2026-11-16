@@ -1,0 +1,8 @@
+{
+  "conventionalCommits.scopes": [
+    "site",
+    "data",
+    "deploy",
+    "repo"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "your-one-piece-chapter",
+  "private": true,
+  "type": "module",
+  "description": "Sito statico: quale capitolo di One Piece era in edicola in Giappone in una certa data.",
+  "scripts": {
+    "dev": "python3 -m http.server 8080 --directory public",
+    "test": "node --test tests/",
+    "update-data": "node scripts/update-chapters.mjs"
+  },
+  "engines": { "node": ">=18" }
+}
