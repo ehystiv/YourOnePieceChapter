@@ -12,7 +12,8 @@ let list = [];
 let dataset = null;
 let today = todayUTC();
 let current = null; // data mostrata (ms), per ridisegnare la scheda quando cambia lingua
-let errKey = null;  // errore mostrato, per tradurlo quando cambia lingua
+let errKey = null;
+let shareText = ''; // testo per "Condividi" della scheda mostrata  // errore mostrato, per tradurlo quando cambia lingua
 
 const fmt = ms => new Date(ms).toLocaleDateString(T.locale, { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const fmtShort = ms => new Date(ms).toLocaleDateString(T.locale, { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
@@ -57,6 +58,8 @@ function coverBlock(c, extra = '') {
 }
 
 const ICONS = {
+  // Freccia che esce da una scatola
+  share: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
   // Bottiglia con messaggio arrotolato
   bottle: `<svg viewBox="0 0 34 54" aria-hidden="true"><rect x="12" y="1" width="10" height="7" rx="2" fill="#a0703c" stroke="#1f2a3a" stroke-width="1.5"/><path d="M13 8h8v7c0 2 7 5 7 12v20a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6V27c0-7 7-10 7-12z" fill="#cfe3e8" fill-opacity=".7" stroke="#1f2a3a" stroke-width="1.5"/><rect x="11" y="26" width="12" height="18" rx="2" fill="#f8ecd0" stroke="#6b6250" stroke-width="1"/><path d="M13 31h8M13 35h8M13 39h5" stroke="#6b6250" stroke-width="1"/></svg>`,
   // Isola nella nebbia, rotta tratteggiata e X
@@ -93,6 +96,7 @@ function renderBefore(r) {
       <a class="wiki" href="${wikiHref(r.first)}" target="_blank" rel="noopener">${T.wikiChapter(r.first.chapter)}</a>
       <a href="#${toISO(r.first.ms)}">${T.chapterShort} ${r.first.chapter} →</a>
     </div>
+    <div class="share-row"><button type="button" class="share" data-share>${ICONS.share}<span aria-live="polite">${T.share}</span></button></div>
   </div>`;
 }
 
@@ -132,6 +136,7 @@ function renderChapter(r) {
       <a class="wiki" href="${wikiHref(c)}" target="_blank" rel="noopener">${T.wikiRead}</a>
       ${r.next ? `<a href="#${toISO(r.next.ms)}">${T.chapterShort} ${r.next.chapter} →</a>` : '<span></span>'}
     </div>
+    <div class="share-row"><button type="button" class="share" data-share>${ICONS.share}<span aria-live="polite">${T.share}</span></button></div>
   </div>`;
 }
 
@@ -141,6 +146,9 @@ function render(ms, animate = true) {
   today = todayUTC();
   const r = lookup(list, ms, today);
   card.innerHTML = '<span class="pin" aria-hidden="true"></span>' + (r.kind === 'before' ? renderBefore(r) : renderChapter(r));
+  shareText = r.kind === 'before'
+    ? T.shareBefore(fmtShort(r.date))
+    : T.shareChapter(fmtShort(r.date), r.chapter.chapter, localTitle(r.chapter)?.text ?? '', r.chapter.ms > today);
   if (animate) { card.classList.remove('show'); void card.offsetWidth; }
   card.classList.add('show');
   document.title = r.kind === 'before' ? T.pageTitle : T.chapterTitle(r.chapter.chapter);
@@ -197,6 +205,38 @@ form.addEventListener('submit', e => {
   }
   const hash = '#' + toISO(ms);
   if (location.hash === hash) render(ms); else location.hash = hash; // hashchange → render
+});
+
+// "Condividi": menu di condivisione del sistema se c'è, altrimenti copia testo e link negli appunti.
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { /* API assente o negata */ }
+  const ta = Object.assign(document.createElement('textarea'), { value: text, readOnly: true });
+  ta.style.cssText = 'position:fixed;opacity:0';
+  document.body.append(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { /* niente */ }
+  ta.remove();
+  return ok;
+}
+
+let shareTimer;
+async function share(btn) {
+  const data = { title: document.title, text: shareText, url: location.href };
+  if (navigator.share && (!navigator.canShare || navigator.canShare(data))) {
+    try { await navigator.share(data); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const ok = await copyText(`${shareText} ${data.url}`);
+  const label = btn.querySelector('span');
+  label.textContent = ok ? T.shareCopied : T.shareFailed;
+  btn.classList.toggle('share--done', ok);
+  clearTimeout(shareTimer);
+  shareTimer = setTimeout(() => { label.textContent = T.share; btn.classList.remove('share--done'); }, 2500);
+}
+
+card.addEventListener('click', e => {
+  const btn = e.target.closest('[data-share]');
+  if (btn) share(btn);
 });
 
 window.addEventListener('hashchange', fromHash);

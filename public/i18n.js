@@ -48,6 +48,11 @@ export const STRINGS = {
     chapterFuture: date => `This chapter is not out yet: it is scheduled for ${date}.`,
     breakNote: (n, future, date) => `One Piece was on break that week. This was the latest chapter out; the next one, <b>${n}</b>, ${future ? 'is scheduled for' : 'came out on'} ${date}.`,
     wikiRead: 'Read the wiki page',
+    share: 'Share',
+    shareCopied: 'Copied!',
+    shareFailed: 'Could not copy',
+    shareChapter: (date, n, title, future) => `${future ? 'The week of' : 'On'} ${date}, ${future ? 'Japan gets' : 'Japan was reading'} One Piece chapter ${n}${title ? ` "${title}"` : ''}. What's yours?`,
+    shareBefore: date => `On ${date}, One Piece hadn't started yet. What's your chapter?`,
     // Footer
     stats: (count, first, firstDate, last, lastFuture, lastDate) =>
       `${count} chapters, from no. ${first} (${firstDate}) to no. ${last} (${lastFuture ? 'scheduled for ' : ''}${lastDate}).`,
@@ -97,6 +102,11 @@ export const STRINGS = {
     chapterFuture: date => `Questo capitolo non è ancora uscito: è previsto per il ${date}.`,
     breakNote: (n, future, date) => `Quella settimana One Piece era in pausa. L'ultimo capitolo uscito era questo; il successivo, il <b>${n}</b>, ${future ? 'è previsto per' : 'è arrivato'} il ${date}.`,
     wikiRead: 'Leggi la scheda sulla wiki',
+    share: 'Condividi',
+    shareCopied: 'Copiato!',
+    shareFailed: 'Copia non riuscita',
+    shareChapter: (date, n, title, future) => `Il ${date} in Giappone ${future ? 'esce' : 'era in edicola'} il capitolo ${n} di One Piece${title ? `, «${title}»` : ''}. E il tuo?`,
+    shareBefore: date => `Il ${date} One Piece non era ancora iniziato. Qual è il tuo capitolo?`,
     stats: (count, first, firstDate, last, lastFuture, lastDate) =>
       `${count} capitoli, dal n. ${first} (${firstDate}) al n. ${last} (${lastFuture ? 'previsto il ' : ''}${lastDate}).`,
     updated: date => `Dati aggiornati al ${date}.`,
