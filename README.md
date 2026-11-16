@@ -23,7 +23,9 @@ npm test             # test con i casi dell'HANDOFF
 npm run update-data  # aggiorna public/chapters.json dalla wiki
 ```
 
-`update-data` riprende sempre tutte le date, ma dalla wiki scarica solo i titoli mancanti (capitoli nuovi o ancora senza titolo). I titoli di 1–1145 vengono da una traduzione curata e la wiki ne ha di diversi. Per riscaricarli comunque tutti:
+Ogni capitolo ha tre titoli: `titleEn` e `titleJa` dalla [One Piece Wiki](https://onepiece.fandom.com/) inglese, `titleIt` dalla [One Piece Wiki Italia](https://onepiece.fandom.com/it/). Il sito mostra il titolo nella lingua scelta insieme a quello giapponese, e il link porta alla scheda sulla wiki della stessa lingua. Se il titolo italiano manca ancora, il sito usa quello inglese e il link porta alla wiki inglese.
+
+`update-data` riprende sempre tutte le date, ma dalle wiki scarica solo i titoli mancanti (capitoli nuovi o ancora senza titolo). I titoli inglesi di 1–1145 vengono da una traduzione curata e la wiki ne ha di diversi. Per riscaricarli comunque tutti:
 
 ```bash
 node scripts/update-chapters.mjs --all-titles

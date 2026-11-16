@@ -76,8 +76,14 @@ test('parseISO rifiuta date inesistenti', () => {
 });
 
 test('nessun titolo contiene markup wiki o HTML', () => {
-  const bad = list.filter(c => hasMarkup(c.titleEn) || hasMarkup(c.titleJa)).map(c => c.chapter);
+  const bad = list.filter(c => hasMarkup(c.titleEn) || hasMarkup(c.titleJa) || hasMarkup(c.titleIt)).map(c => c.chapter);
   assert.deepEqual(bad, []);
+});
+
+test('ogni capitolo già uscito ha il titolo inglese e quello italiano', () => {
+  const missing = list.filter(c => c.ms <= TODAY && (!c.titleEn || !c.titleIt)).map(c => c.chapter);
+  assert.deepEqual(missing, []);
+  assert.equal(list.find(c => c.chapter === 1053).titleIt, 'I nuovi imperatori');
 });
 
 test('cleanTitle ripulisce i casi visti sulla wiki', () => {
