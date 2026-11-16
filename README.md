@@ -1,53 +1,86 @@
-# Il tuo capitolo di One Piece
+# Your One Piece Chapter
 
-Sito statico, senza build e senza dipendenze. Inserisci una data e il sito mostra il capitolo di One Piece che era in edicola in Giappone quella settimana (Weekly Shōnen Jump). Dettagli su dati e logica in [HANDOFF.md](HANDOFF.md).
+Enter a date (your birthday, for example) and find out which One Piece chapter was on newsstands in Japan that week, in Weekly Shōnen Jump.
 
-## Struttura
+**Live site: https://your-one-piece-chapter.ehystiv.dev/**
 
-| Percorso | Contenuto |
+It is a static site with no build step and no dependencies: plain HTML, CSS and JavaScript modules, plus one JSON file with the chapter data. The interface is available in English and Italian.
+
+Want to help, for example by adding a language? See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## How it works
+
+- The dataset lists every chapter with its Japanese release date (`releaseDate`, a plain calendar date with no time zone).
+- For the chosen date, a binary search finds the last chapter released on or before that day:
+  - released **that very day** → the card shows "ドン!";
+  - released **within the previous 6 days** → "out that week";
+  - **7 days or more** → One Piece was on break that week: the card shows the chapter still on newsstands and when the next one came out.
+- Dates before chapter 1 (19 July 1997) show how many days were left, and mention the *Romance Dawn* one-shot when it applies.
+- Chapters with a future date are marked as scheduled. Dates past the last known chapter say that week's chapter has not been announced yet.
+
+Release dates cannot be computed with a "one chapter per week" rule: breaks are irregular (author breaks, double issues, the month-long break in July 2022), so the site relies on the real dates.
+
+The chosen date is stored in the URL hash, for example `/#1997-07-25`, so links can be shared and work on any static host without rewrite rules.
+
+## Project structure
+
+| Path | Contents |
 |---|---|
-| `public/` | **La cartella da pubblicare**, così com'è. |
-| `public/index.html`, `styles.css` | Pagina e stile (carta d'epoca, nessuna immagine ufficiale). |
-| `public/lookup.js` | Logica di ricerca pura (ricerca binaria sulle date), usata dal sito e dai test. |
-| `public/app.js` | Interfaccia: legge `chapters.json`, mostra la scheda, gestisce la navigazione e il cambio lingua. |
-| `public/i18n.js` | Testi dell'interfaccia in inglese (predefinito) e italiano. La scelta fatta con lo switch EN/IT resta salvata nel browser. |
-| `public/chapters.json` | Dataset dei capitoli. |
-| `scripts/update-chapters.mjs` | Rigenera `public/chapters.json` dalla One Piece Wiki. |
-| `tests/` | Test della logica (`node --test`). |
+| `public/` | **The folder that gets published**, as is. |
+| `public/index.html`, `public/styles.css` | Page and styling: wanted poster, nautical chart background, newspaper clipping for break weeks. |
+| `public/lookup.js` | Pure lookup logic (binary search on dates), shared by the site and the tests. |
+| `public/app.js` | UI: loads `chapters.json`, renders the card, handles navigation and the language switch. |
+| `public/i18n.js` | UI strings for each language (English is the default). The language picked with the switch is remembered in the browser. |
+| `public/chapters.json` | Chapter dataset. |
+| `scripts/update-chapters.mjs` | Updates `public/chapters.json` from the One Piece wikis. |
+| `scripts/clean-title.mjs` | Turns wiki markup in titles into plain text. |
+| `tests/` | Tests for the logic and the dataset (`node --test`). |
+| `HANDOFF.md` | Original project brief (in Italian). |
 
-## Comandi
+## Commands
+
+Requires Node 18 or later (only for tests and data updates) and Python 3 (only for the local server).
 
 ```bash
-npm run dev          # http://localhost:8080 (serve un server: con file:// il fetch del JSON non funziona)
-npm test             # test con i casi dell'HANDOFF
-npm run update-data  # aggiorna public/chapters.json dalla wiki
+npm run dev          # http://localhost:8080 (a server is needed: with file:// the JSON fetch fails)
+npm test             # lookup and dataset tests
+npm run update-data  # update public/chapters.json from the wikis
 ```
 
-Ogni capitolo ha tre titoli: `titleEn` e `titleJa` dalla [One Piece Wiki](https://onepiece.fandom.com/) inglese, `titleIt` dalla [One Piece Wiki Italia](https://onepiece.fandom.com/it/). Il sito mostra il titolo nella lingua scelta insieme a quello giapponese, e il link porta alla scheda sulla wiki della stessa lingua. Se il titolo italiano manca ancora, il sito usa quello inglese e il link porta alla wiki inglese.
+## Data
 
-La copertina (`cover`: URL e dimensioni) è l'immagine `Chapter_N.png` della wiki inglese. Il sito la carica direttamente dalla CDN di Fandom (`static.wikia.nocookie.net`), ridimensionata dal loro server: le immagini non sono copiate nella repo. Le copertine sono © Eiichiro Oda / Shueisha e la scheda lo indica nella didascalia.
+Each chapter in `chapters.json` has:
 
-`update-data` riprende sempre tutte le date, ma dalle wiki scarica solo i titoli e le copertine mancanti (capitoli nuovi o ancora senza titolo). I titoli inglesi di 1–1145 vengono da una traduzione curata e la wiki ne ha di diversi. Per riscaricarli comunque tutti:
+| Field | Source |
+|---|---|
+| `releaseDate` | `Template:WhichMangaDate` on the English [One Piece Wiki](https://onepiece.fandom.com/) |
+| `titleEn`, `titleJa` | `{{Chapter Box}}` on the English wiki pages `Chapter_N` (English titles for chapters 1–1145 come from a curated translation) |
+| `titleIt` | `{{Profilo capitolo}}` on the [One Piece Wiki Italia](https://onepiece.fandom.com/it/) pages `Capitolo_N` |
+| `cover` | URL and size of `Chapter_N.png` on the English wiki |
+
+The site shows the title in the selected language together with the Japanese one, and links to the chapter page on the wiki in the same language. When a translated title is still missing, it falls back to the English title and the English wiki.
+
+Covers are loaded straight from Fandom's CDN (`static.wikia.nocookie.net`), resized by their server: no images are stored in this repository. Covers are © Eiichiro Oda / Shueisha, and the card says so in its caption.
+
+`update-data` always refreshes every release date, but only downloads titles and covers that are missing (new chapters, or chapters without a title yet). Titles already in the file are kept, so the curated English titles are not replaced by the wiki ones. To download everything again:
 
 ```bash
 node scripts/update-chapters.mjs --all-titles
 ```
 
-## Link condivisibili
+## Deployment
 
-La data scelta finisce nell'hash dell'URL, per esempio `/#1997-07-25`. Funziona su qualunque hosting statico senza regole di rewrite.
+The site is published with GitHub Pages through GitHub Actions. The custom domain and enforced HTTPS are set in *Settings → Pages*, and `ehystiv.github.io/YourOnePieceChapter/` redirects there.
 
-## Pubblicazione
+- [`.github/workflows/pages.yml`](.github/workflows/pages.yml) runs the tests and publishes `public/` on every push to `main` that touches the site. It can also be started by hand from *Actions*.
+- [`.github/workflows/update-data.yml`](.github/workflows/update-data.yml) refreshes `chapters.json` every Monday at 06:00 UTC. If any chapter changed, it commits the file and redeploys the site. It can be started by hand from *Actions → Update chapter data → Run workflow*.
 
-Il sito è online su **https://your-one-piece-chapter.ehystiv.dev/**, pubblicato con GitHub Pages tramite GitHub Actions. Il dominio personalizzato e l'HTTPS obbligatorio sono impostati in *Settings → Pages*, e `ehystiv.github.io/YourOnePieceChapter/` reindirizza lì.
+GitHub disables scheduled workflows after 60 days without activity in the repository. If that happens, re-enable it from the *Actions* tab.
 
-- [`.github/workflows/pages.yml`](.github/workflows/pages.yml) esegue i test e pubblica `public/` a ogni push su `main` che tocca il sito (si può anche avviare a mano da *Actions*).
-- [`.github/workflows/update-data.yml`](.github/workflows/update-data.yml) ogni lunedì alle 06:00 UTC rigenera `chapters.json` dalla wiki. Se i capitoli sono cambiati fa il commit e ripubblica il sito. Si può avviare a mano da *Actions → Update chapter data → Run workflow*.
+`public/` can also be published as is on any other static host.
 
-Nota: GitHub sospende i workflow pianificati dopo 60 giorni senza attività nella repo. Se succede, riattivalo dalla scheda *Actions*.
+## License and credits
 
-`public/` resta comunque pubblicabile su qualsiasi altro hosting statico, così com'è.
+Release dates and titles come from the [One Piece Wiki](https://onepiece.fandom.com/) and the [One Piece Wiki Italia](https://onepiece.fandom.com/it/), under the CC BY-SA license. Chapter covers are © Eiichiro Oda / Shueisha.
 
-## Licenza dei dati
-
-Date e titoli vengono dalla [One Piece Wiki](https://onepiece.fandom.com/) (CC BY-SA). Pagina non ufficiale, realizzata da un fan.
+This is an unofficial fan-made project, not affiliated with Eiichiro Oda, Shueisha or Toei Animation.
