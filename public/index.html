@@ -9,11 +9,21 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23b3261e'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' font-weight='700' text-anchor='middle' fill='%23fffaf0'%3ECh%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Shippori+Mincho:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Shippori+Mincho:wght@500;700&family=Inter:wght@400;500;600;700&family=Rye&display=swap" rel="stylesheet">
+<!-- Solo i glifi di "ドン!" -->
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap&text=%E3%83%89%E3%83%B3!" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script type="module" src="app.js"></script>
 </head>
 <body>
+<svg class="compass-rose" viewBox="0 0 200 200" aria-hidden="true">
+  <g fill="none" stroke="currentColor" stroke-width="2"><circle cx="100" cy="100" r="92"/><circle cx="100" cy="100" r="80"/><circle cx="100" cy="100" r="30"/></g>
+  <g fill="currentColor">
+    <path d="M100 4l10 86-10 10-10-10zM100 196l-10-86 10-10 10 10zM4 100l86-10 10 10-10 10zM196 100l-86 10-10-10 10-10z"/>
+    <path d="M100 100l38-38-30 46zM100 100l-38 38 30-46zM100 100l38 38-46-30zM100 100l-38-38 46 30z" opacity=".6"/>
+  </g>
+  <text x="100" y="26" text-anchor="middle" font-family="Fraunces, serif" font-weight="800" font-size="18" fill="#f3e9d2">N</text>
+</svg>
 <main>
   <nav class="lang" role="group" aria-label="Language" data-i18n-aria="langSwitch">
     <button type="button" data-lang="en" lang="en" aria-pressed="true">EN</button>
@@ -22,13 +32,16 @@
 
   <header>
     <div class="kicker" data-i18n="kicker">Weekly Shōnen Jump · since 1997</div>
-    <h1 data-i18n-html="h1">Your One Piece<br>chapter</h1>
+    <h1 data-i18n-html="h1">Your <span class="hl">One Piece</span><br>chapter</h1>
     <p class="sub" data-i18n="sub">Enter a date (your birthday, for example) and find out which chapter was on newsstands in Japan that week.</p>
   </header>
 
   <form id="f" autocomplete="off">
-    <input type="date" id="d" min="1990-01-01" required aria-label="Date" data-i18n-aria="dateLabel">
-    <button type="submit" disabled data-i18n="search">Search</button>
+    <span class="field">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 8.5l-2 5-5 2 2-5z" fill="currentColor"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke="currentColor" stroke-width="2"/></svg>
+      <input type="date" id="d" min="1990-01-01" required aria-label="Date" data-i18n-aria="dateLabel">
+    </span>
+    <button type="submit" disabled data-i18n="search">Set sail!</button>
   </form>
   <div class="err" id="err" role="alert"></div>
 

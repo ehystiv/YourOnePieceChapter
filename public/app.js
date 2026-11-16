@@ -37,68 +37,102 @@ const wikiHref = c => (c[T.titleField] ? T : STRINGS.en).wikiUrl(c.chapter);
 // Copertina dalla CDN della wiki, ridimensionata dal server di Fandom (scale-to-width-down).
 const coverUrl = (src, w) => src.replace('/revision/latest', `/revision/latest/scale-to-width-down/${w}`);
 
-function coverBlock(c) {
-  if (!c.cover) return '';
+// La "foto" del manifesto: la copertina, oppure un riquadro vuoto con "?".
+// `extra`: elementi sovrapposti alla foto (timbro, ドン!).
+function coverBlock(c, extra = '') {
+  if (!c.cover) {
+    return `<figure class="cover cover--empty"><div class="photo"><div class="blank" aria-hidden="true">?</div>${extra}</div><figcaption>${T.noCover}</figcaption></figure>`;
+  }
   const { src, width, height } = c.cover;
   const sizes = [320, 480, 640, 960].filter(w => w < width);
   const srcset = sizes.map(w => `${coverUrl(src, w)} ${w}w`).concat(`${src} ${width}w`).join(', ');
   return `<figure class="cover">
-      <a href="${wikiHref(c)}" target="_blank" rel="noopener">
-        <img src="${coverUrl(src, Math.min(640, width))}" srcset="${srcset}" sizes="${width >= height ? '(max-width: 600px) 90vw, 512px' : '320px'}"
+      <div class="photo" style="--ar: ${(width / height).toFixed(4)}"><a href="${wikiHref(c)}" target="_blank" rel="noopener">
+        <img src="${coverUrl(src, Math.min(640, width))}" srcset="${srcset}" sizes="${width >= height ? '(max-width: 600px) 90vw, 512px' : '300px'}"
           width="${width}" height="${height}" style="--ar: ${(width / height).toFixed(4)}" alt="${esc(T.coverAlt(c.chapter))}" decoding="async"
           onerror="this.closest('figure').remove()">
-      </a>
+      </a>${extra}</div>
       <figcaption>${T.coverCredit}</figcaption>
     </figure>`;
 }
 
-function chapterBlock(c, label, future) {
+const ICONS = {
+  // Bottiglia con messaggio arrotolato
+  bottle: `<svg viewBox="0 0 34 54" aria-hidden="true"><rect x="12" y="1" width="10" height="7" rx="2" fill="#a0703c" stroke="#1f2a3a" stroke-width="1.5"/><path d="M13 8h8v7c0 2 7 5 7 12v20a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6V27c0-7 7-10 7-12z" fill="#cfe3e8" fill-opacity=".7" stroke="#1f2a3a" stroke-width="1.5"/><rect x="11" y="26" width="12" height="18" rx="2" fill="#f8ecd0" stroke="#6b6250" stroke-width="1"/><path d="M13 31h8M13 35h8M13 39h5" stroke="#6b6250" stroke-width="1"/></svg>`,
+  // Isola nella nebbia, rotta tratteggiata e X
+  island: `<svg class="island" viewBox="0 34 340 106" aria-hidden="true">
+    <g fill="none" stroke="#1d3557" stroke-opacity=".35" stroke-width="1.5"><path d="M10 120q12-8 24 0t24 0t24 0"/><path d="M250 132q12-8 24 0t24 0t24 0"/><path d="M40 40q12-8 24 0t24 0"/></g>
+    <path d="M20 128C70 128 90 70 150 88" fill="none" stroke="#b3261e" stroke-width="2.5" stroke-dasharray="7 7"/>
+    <path d="M150 104c-8-26 20-44 52-46 30-2 66 6 74 26 8 22-18 36-56 38-38 2-64-2-70-18z" fill="#e8b84a" fill-opacity=".55" stroke="#1f2a3a" stroke-width="2.5"/>
+    <path d="M196 70c10-14 28-14 36 0" fill="none" stroke="#1f2a3a" stroke-width="2"/>
+    <g fill="#f8ecd0" fill-opacity=".85"><ellipse cx="170" cy="72" rx="46" ry="12"/><ellipse cx="248" cy="94" rx="52" ry="11"/><ellipse cx="210" cy="112" rx="60" ry="10"/></g>
+    <text x="214" y="98" text-anchor="middle" font-family="Fraunces, serif" font-weight="800" font-size="48" fill="#b3261e">?</text>
+  </svg>`,
+};
+
+function titleBlock(c, future) {
   const t = localTitle(c);
-  const title = t
-    ? `<div class="en"${t.lang !== lang ? ` lang="${t.lang}"` : ''}>${esc(t.text)}</div>`
-    : `<div class="en">${future ? T.titleTba : '—'}</div>`;
-  return `
-    <div class="label">${label}</div>
-    <div class="num"><small>${T.chapterShort}</small>${c.chapter}</div>
-    ${title}
-    <p class="ja" lang="ja">${c.titleJa ? esc(c.titleJa) : ''}</p>`;
+  return t
+    ? `<h2 class="title"${t.lang !== lang ? ` lang="${t.lang}"` : ''}>${esc(t.text)}</h2>`
+    : `<h2 class="title">${future ? T.titleTba : '—'}</h2>`;
 }
 
 function renderBefore(r) {
-  return `<div class="stamp">${T.stampBefore}</div>
+  return `<div class="poster poster--chart">
+    <div class="stamp stamp--muted">${T.stampBefore}</div>
+    <div class="chart-title">${T.uncharted}</div>
+    ${ICONS.island}
     <div class="label">${esc(fmt(r.date))}</div>
-    <div class="num num--text">${T.notYet}</div>
-    <p class="en">${T.notStarted}</p>
+    <div class="bounty bounty--text"><span class="num">${T.notYet}</span></div>
+    <h2 class="title">${T.notStarted}</h2>
+    <div class="waves" aria-hidden="true"></div>
     <div class="meta">${T.beforeMeta(days(r.daysToFirst), r.first.chapter, esc(localTitle(r.first)?.text ?? ''), esc(fmtShort(r.first.ms)))}</div>
     ${r.romanceDawn ? `<div class="note">${T.romanceDawn(esc(fmtShort(ROMANCE_DAWN)))}</div>` : ''}
     <div class="nav">
       <span></span>
       <a class="wiki" href="${wikiHref(r.first)}" target="_blank" rel="noopener">${T.wikiChapter(r.first.chapter)}</a>
       <a href="#${toISO(r.first.ms)}">${T.chapterShort} ${r.first.chapter} →</a>
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function renderChapter(r) {
   const c = r.chapter;
   const k = r.beyondArchive ? 'beyond' : r.kind;
-
   const meta = T.released(r.chapterIsFuture, esc(fmt(c.ms))) + (r.since > 0 ? T.sinceBefore(days(r.since)) : '') + '.';
 
+  // La nota cambia forma con lo stato: bottiglia (futuro), giornale (pausa).
   let note = '';
-  if (r.beyondArchive) note = r.date > today ? T.beyondFuture : T.beyondStale;
-  else if (r.chapterIsFuture) note = T.chapterFuture(esc(fmtShort(c.ms)));
-  else if (r.kind === 'break' && r.next) note = T.breakNote(r.next.chapter, r.nextIsFuture, esc(fmtShort(r.next.ms)));
+  if (r.beyondArchive || r.chapterIsFuture) {
+    const text = r.beyondArchive ? (r.date > today ? T.beyondFuture : T.beyondStale) : T.chapterFuture(esc(fmtShort(c.ms)));
+    note = `<div class="bottle">${ICONS.bottle}<span>${text}</span></div>`;
+  } else if (r.kind === 'break' && r.next) {
+    note = `<div class="news">
+        <div class="news-mast"><span>${T.newsMast}</span><span>${esc(fmtShort(r.date))}</span></div>
+        <div class="news-head">${T.newsHead}</div>
+        <p>${T.breakNote(r.next.chapter, r.nextIsFuture, esc(fmtShort(r.next.ms)))}</p>
+      </div>`;
+  }
+  const don = r.kind === 'release' && !r.chapterIsFuture ? `<span class="don" lang="ja" aria-hidden="true">ドン!</span>` : '';
 
-  return `<div class="stamp${k === 'break' || k === 'beyond' ? ' stamp--muted' : ''}">${T.stamp[k]}</div>
-    ${chapterBlock(c, esc(T.label[k]) + ' · ' + esc(fmtShort(r.date)), r.chapterIsFuture)}
-    ${coverBlock(c)}
+  const stamp = `<div class="stamp${k === 'break' || k === 'beyond' ? ' stamp--muted' : ''}">${T.stamp[k]}</div>`;
+
+  return `<div class="poster">
+    <div class="wanted" aria-hidden="true">WANTED</div>
+    ${coverBlock(c, stamp + don)}
+    <div class="label">${esc(T.label[k])} · ${esc(fmtShort(r.date))}</div>
+    ${titleBlock(c, r.chapterIsFuture)}
+    <p class="ja" lang="ja">${c.titleJa ? esc(c.titleJa) : ''}</p>
+    <div class="bounty"><small>${T.chapterShort}</small><span class="num">${c.chapter}</span><span class="dash" aria-hidden="true">—</span></div>
+    <div class="waves" aria-hidden="true"></div>
     <div class="meta">${meta}</div>
-    ${note ? `<div class="note">${note}</div>` : ''}
+    ${note}
     <div class="nav">
       ${r.prev ? `<a href="#${toISO(r.prev.ms)}">← ${T.chapterShort} ${r.prev.chapter}</a>` : '<span></span>'}
       <a class="wiki" href="${wikiHref(c)}" target="_blank" rel="noopener">${T.wikiRead}</a>
       ${r.next ? `<a href="#${toISO(r.next.ms)}">${T.chapterShort} ${r.next.chapter} →</a>` : '<span></span>'}
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function render(ms, animate = true) {
@@ -106,7 +140,7 @@ function render(ms, animate = true) {
   current = ms;
   today = todayUTC();
   const r = lookup(list, ms, today);
-  card.innerHTML = r.kind === 'before' ? renderBefore(r) : renderChapter(r);
+  card.innerHTML = '<span class="pin" aria-hidden="true"></span>' + (r.kind === 'before' ? renderBefore(r) : renderChapter(r));
   if (animate) { card.classList.remove('show'); void card.offsetWidth; }
   card.classList.add('show');
   document.title = r.kind === 'before' ? T.pageTitle : T.chapterTitle(r.chapter.chapter);
