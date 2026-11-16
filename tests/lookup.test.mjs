@@ -99,6 +99,14 @@ test('cleanTitle ripulisce i casi visti sulla wiki', () => {
   assert.equal(cleanTitle(''), null);
 });
 
+test('ogni capitolo già uscito ha una copertina valida sulla CDN della wiki', () => {
+  const bad = list.filter(c => c.ms <= TODAY && !(
+    c.cover && c.cover.width > 0 && c.cover.height > 0 &&
+    /^https:\/\/static\.wikia\.nocookie\.net\/onepiece\/images\/.+\/Chapter_\d+\.\w+\/revision\/latest/.test(c.cover.src)
+  )).map(c => c.chapter);
+  assert.deepEqual(bad, []);
+});
+
 test('il dataset è ordinato, senza buchi e con numeri crescenti', () => {
   for (let i = 1; i < list.length; i++) {
     assert.ok(list[i].ms > list[i - 1].ms, `data non crescente al capitolo ${list[i].chapter}`);

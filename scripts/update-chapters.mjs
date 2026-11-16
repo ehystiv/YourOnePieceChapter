@@ -1,6 +1,7 @@
 // Aggiorna chapters.json dalla One Piece Wiki (Fandom, MediaWiki API).
 // Uso: node scripts/update-chapters.mjs [output.json] [--all-titles]
 //      (Node 18+, fetch nativo; default: public/chapters.json)
+//      --all-titles riscarica anche titoli e copertine già presenti.
 //
 // Fonti:
 //  - Date: Template:WhichMangaDate della wiki inglese, uno #switch con righe "|Chapter N=MM/DD/YYYY".
@@ -83,12 +84,43 @@ for (const [lang, wiki] of Object.entries(WIKIS)) {
   report.push(`${lang}: ${todo.length}`);
 }
 
+// 3) Copertine: immagine principale della pagina "Chapter_N" sulla wiki inglese (file "Chapter_N.*").
+//    Si salva solo l'URL sulla CDN di Fandom con le dimensioni, le immagini non vengono copiate.
+const covers = new Map();
+const coverTodo = [...dates.keys()].filter(n => !has(n, 'cover')).sort((a, b) => a - b);
+for (let s = 0; s < coverTodo.length; s += 50) {
+  const names = coverTodo.slice(s, s + 50).map(WIKIS.en.page);
+  const r = await api(WIKIS.en.api, { action: 'query', prop: 'pageimages', piprop: 'original|name', pilimit: '50', redirects: '1', titles: names.join('|') });
+  for (const p of r.query.pages) {
+    const n = Number(p.title.split(' ').pop());
+    // Il segnaposto (es. NoPicAvailable.png) non conta come copertina.
+    if (p.original && new RegExp(`^Chapter_${n}\\.(png|jpe?g|webp|gif)$`, 'i').test(p.pageimage ?? '')) {
+      covers.set(n, { src: p.original.source, width: p.original.width, height: p.original.height });
+    }
+  }
+  if (s + 50 < coverTodo.length) await pause();
+}
+// Se l'immagine principale è un'altra (es. la tavola a colori), si cerca direttamente il file "Chapter_N.png".
+const coverRetry = coverTodo.filter(n => !covers.has(n));
+for (let s = 0; s < coverRetry.length; s += 50) {
+  const files = coverRetry.slice(s, s + 50).map(n => `File:Chapter_${n}.png`);
+  const r = await api(WIKIS.en.api, { action: 'query', prop: 'imageinfo', iiprop: 'url|size', titles: files.join('|') });
+  for (const p of r.query.pages) {
+    const ii = p.imageinfo?.[0];
+    const m = /^File:Chapter (\d+)\.png$/.exec(p.title);
+    if (ii && m) covers.set(Number(m[1]), { src: ii.url, width: ii.width, height: ii.height });
+  }
+  if (s + 50 < coverRetry.length) await pause();
+}
+report.push(`copertine: ${coverTodo.length}`);
+
 const chapters = [];
 for (let n = 1; n <= max; n++) {
   if (!dates.has(n)) continue;
   const old = existing.get(n) ?? {}, t = fetched.get(n) ?? {};
   const c = { chapter: n, releaseDate: dates.get(n) };
   for (const f of TITLE_FIELDS) c[f] = (has(n, f) ? old[f] : t[f] ?? (ALL_TITLES ? null : old[f])) ?? null;
+  c.cover = (has(n, 'cover') ? old.cover : covers.get(n) ?? (ALL_TITLES ? null : old.cover)) ?? null;
   chapters.push(c);
 }
 
@@ -97,5 +129,5 @@ await writeFile(OUT, JSON.stringify({
   generatedAt: new Date().toISOString().slice(0, 10),
   dateMeaning: 'Data di uscita giapponese (Weekly Shonen Jump)',
   chapters,
-}, null, 1));
+}, null, 1).replace(/"cover": \{\n\s*("src": .*),\n\s*("width": \d+),\n\s*("height": \d+)\n\s*\}/g, '"cover": { $1, $2, $3 }')); // copertina su una riga
 console.log(`Scritti ${chapters.length} capitoli in ${OUT} (ultimo: ${max}, ${dates.get(max)}); pagine scaricate per wiki: ${report.join(', ')}`);
