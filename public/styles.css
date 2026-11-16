@@ -1,0 +1,73 @@
+:root {
+  --paper: #f3e9d2; --paper2: #eadcbc; --card: #fffaf0; --ink: #1f2a3a; --muted: #6b6250;
+  --red: #b3261e; --navy: #1d3557; --line: #cdbb93;
+}
+* { box-sizing: border-box }
+html, body { margin: 0 }
+body {
+  font-family: Inter, system-ui, sans-serif; color: var(--ink); min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #fff7e3 0%, transparent 60%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.018) 0 2px, transparent 2px 4px),
+    var(--paper);
+  display: flex; justify-content: center; padding: 32px 16px 48px;
+}
+main { width: 100%; max-width: 560px }
+
+.lang { display: flex; justify-content: flex-end; gap: 0; margin: -12px 0 10px }
+.lang button {
+  font: 600 12px Inter, sans-serif; letter-spacing: .08em; padding: 5px 10px; border-radius: 0;
+  background: var(--card); color: var(--ink); box-shadow: none; border: 2px solid var(--ink);
+}
+.lang button + button { border-left: 0 }
+.lang button:first-child { border-radius: 8px 0 0 8px }
+.lang button:last-child { border-radius: 0 8px 8px 0 }
+.lang button[aria-pressed="true"] { background: var(--navy); color: #fff; cursor: default }
+.lang button:active { transform: none; box-shadow: none }
+header { text-align: center; margin-bottom: 22px }
+.kicker { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--red); font-weight: 600 }
+h1 { font-family: Fraunces, serif; font-weight: 800; font-size: clamp(30px, 7vw, 44px); line-height: 1.05; margin: 8px 0 10px; color: var(--navy) }
+.sub { color: var(--muted); font-size: 15px; margin: 0 }
+
+form { display: flex; gap: 10px; margin: 22px 0 18px }
+input[type=date] {
+  flex: 1; font: 500 16px Inter, sans-serif; padding: 13px 14px; border: 2px solid var(--ink); border-radius: 10px;
+  background: var(--card); color: var(--ink); min-width: 0;
+}
+button {
+  font: 600 15px Inter, sans-serif; padding: 0 18px; border-radius: 10px; border: 2px solid var(--ink);
+  background: var(--red); color: #fff; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: transform .08s, box-shadow .08s;
+}
+button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink) }
+button:disabled { opacity: .55; cursor: progress }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px }
+
+.card {
+  position: relative; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 26px 24px 22px;
+  box-shadow: 6px 6px 0 var(--ink); display: none;
+}
+.card.show { display: block; animation: pop .25s ease-out }
+@keyframes pop { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) { .card.show { animation: none } }
+
+.stamp {
+  position: absolute; top: -14px; right: 18px; background: var(--red); color: #fff; font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 6px 10px; border-radius: 6px; font-weight: 600;
+}
+.stamp--muted { background: var(--navy) }
+.label { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 600 }
+.num { font-family: Fraunces, serif; font-weight: 800; font-size: clamp(64px, 18vw, 96px); line-height: .95; color: var(--red); margin: 6px 0 4px }
+.num small { font-size: .32em; color: var(--ink); font-weight: 600; margin-right: 6px; vertical-align: .9em }
+.num--text { font-size: clamp(40px, 11vw, 60px) }
+.en { font-family: Fraunces, serif; font-size: 22px; font-weight: 600; margin: 6px 0 2px; overflow-wrap: anywhere }
+.ja { font-family: "Shippori Mincho", serif; font-size: 17px; color: var(--muted); margin: 0 0 16px; min-height: 1px }
+.meta { border-top: 1px dashed var(--line); padding-top: 14px; font-size: 15px; line-height: 1.55 }
+.meta b { color: var(--navy) }
+.note { margin-top: 12px; font-size: 14px; background: var(--paper2); border-radius: 8px; padding: 10px 12px; line-height: 1.5 }
+.nav { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 16px; flex-wrap: wrap }
+.nav a { font-size: 14px; color: var(--navy); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--line) }
+.nav a:hover { border-color: var(--red) }
+
+.err { color: var(--red); font-weight: 600; font-size: 14px; min-height: 20px; text-align: center }
+footer { margin-top: 28px; text-align: center; font-size: 12px; color: var(--muted); line-height: 1.6 }
+footer a { color: inherit }

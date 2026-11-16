@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your One Piece Chapter</title>
+<meta name="description" content="Enter a date and find out which One Piece chapter was on newsstands in Japan that week.">
+<meta name="theme-color" content="#f3e9d2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23b3261e'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' font-weight='700' text-anchor='middle' fill='%23fffaf0'%3ECh%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Shippori+Mincho:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<main>
+  <nav class="lang" role="group" aria-label="Language" data-i18n-aria="langSwitch">
+    <button type="button" data-lang="en" lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="it" lang="it" aria-pressed="false">IT</button>
+  </nav>
+
+  <header>
+    <div class="kicker" data-i18n="kicker">Weekly Shōnen Jump · since 1997</div>
+    <h1 data-i18n-html="h1">Your One Piece<br>chapter</h1>
+    <p class="sub" data-i18n="sub">Enter a date (your birthday, for example) and find out which chapter was on newsstands in Japan that week.</p>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <input type="date" id="d" min="1990-01-01" required aria-label="Date" data-i18n-aria="dateLabel">
+    <button type="submit" disabled data-i18n="search">Search</button>
+  </form>
+  <div class="err" id="err" role="alert"></div>
+
+  <section class="card" id="card" aria-live="polite"></section>
+
+  <footer>
+    <span id="stats" data-i18n="loading">Loading chapters…</span><br>
+    <span data-i18n-html="source">Japanese release dates and titles from the One Piece Wiki (CC BY-SA license).</span><br>
+    <span data-i18n="fanMade">Unofficial fan-made page.</span>
+  </footer>
+</main>
+<noscript><p style="text-align:center">This page needs JavaScript. · Per usare la pagina serve JavaScript.</p></noscript>
+</body>
+</html>
