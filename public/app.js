@@ -34,6 +34,24 @@ function localTitle(c) {
 // Scheda sulla wiki della lingua scelta; se lì il capitolo non c'è ancora (nessun titolo), quella inglese.
 const wikiHref = c => (c[T.titleField] ? T : STRINGS.en).wikiUrl(c.chapter);
 
+// Copertina dalla CDN della wiki, ridimensionata dal server di Fandom (scale-to-width-down).
+const coverUrl = (src, w) => src.replace('/revision/latest', `/revision/latest/scale-to-width-down/${w}`);
+
+function coverBlock(c) {
+  if (!c.cover) return '';
+  const { src, width, height } = c.cover;
+  const sizes = [320, 480, 640, 960].filter(w => w < width);
+  const srcset = sizes.map(w => `${coverUrl(src, w)} ${w}w`).concat(`${src} ${width}w`).join(', ');
+  return `<figure class="cover">
+      <a href="${wikiHref(c)}" target="_blank" rel="noopener">
+        <img src="${coverUrl(src, Math.min(640, width))}" srcset="${srcset}" sizes="${width >= height ? '(max-width: 600px) 90vw, 512px' : '320px'}"
+          width="${width}" height="${height}" style="--ar: ${(width / height).toFixed(4)}" alt="${esc(T.coverAlt(c.chapter))}" decoding="async"
+          onerror="this.closest('figure').remove()">
+      </a>
+      <figcaption>${T.coverCredit}</figcaption>
+    </figure>`;
+}
+
 function chapterBlock(c, label, future) {
   const t = localTitle(c);
   const title = t
@@ -73,6 +91,7 @@ function renderChapter(r) {
 
   return `<div class="stamp${k === 'break' || k === 'beyond' ? ' stamp--muted' : ''}">${T.stamp[k]}</div>
     ${chapterBlock(c, esc(T.label[k]) + ' · ' + esc(fmtShort(r.date)), r.chapterIsFuture)}
+    ${coverBlock(c)}
     <div class="meta">${meta}</div>
     ${note ? `<div class="note">${note}</div>` : ''}
     <div class="nav">

@@ -61,6 +61,14 @@ button:disabled { opacity: .55; cursor: progress }
 .num--text { font-size: clamp(40px, 11vw, 60px) }
 .en { font-family: Fraunces, serif; font-size: 22px; font-weight: 600; margin: 6px 0 2px; overflow-wrap: anywhere }
 .ja { font-family: "Shippori Mincho", serif; font-size: 17px; color: var(--muted); margin: 0 0 16px; min-height: 1px }
+.cover { margin: 0 0 16px; text-align: center }
+.cover a { display: block }
+/* --ar = larghezza/altezza: le orizzontali occupano tutta la scheda, le verticali si fermano a 440px di altezza. */
+.cover img {
+  display: block; margin: 0 auto; width: min(100%, calc(440px * var(--ar, .7))); height: auto; aspect-ratio: var(--ar, .7);
+  border: 2px solid var(--ink); border-radius: 8px; background: var(--paper2);
+}
+.cover figcaption { margin-top: 6px; font-size: 11px; color: var(--muted) }
 .meta { border-top: 1px dashed var(--line); padding-top: 14px; font-size: 15px; line-height: 1.55 }
 .meta b { color: var(--navy) }
 .note { margin-top: 12px; font-size: 14px; background: var(--paper2); border-radius: 8px; padding: 10px 12px; line-height: 1.5 }
